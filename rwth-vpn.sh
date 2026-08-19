@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# rwth-vpn.sh - one-run CLI for the RWTH VPN on Fedora.
+# rwth-vpn.sh - one-run CLI for the RWTH VPN on Linux.
 #
 # Does everything the README describes, in a single command: picks a working
 # OpenConnect (>= 9.20, building 9.21 into ~/.local if the system package is too
-# old - see docs/01-why-the-fedora-package-fails.md), then connects to vpn.rwth-aachen.de.
+# old - see docs/01-why-the-distro-package-fails.md), then connects to vpn.rwth-aachen.de.
 #
 #   ./rwth-vpn.sh -u ab123456              # split tunnel, foreground
 #   ./rwth-vpn.sh -u ab123456 -g full -b   # full tunnel, background
@@ -19,7 +19,7 @@ PREFIX="$HOME/.local/openconnect-$VERSION"
 SRC_DIR="$HOME/src/openconnect"
 PID_FILE="/run/openconnect-rwth.pid"
 CONFIG_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/rwth-vpn.conf"
-REQUIREMENTS="$(dirname "$(readlink -f "$0")")/requirements.txt"
+REPO_DIR="$(dirname "$(readlink -f "$0")")"
 MIN_MAJOR=9
 MIN_MINOR=20
 
@@ -108,17 +108,20 @@ oc_is_new_enough() {
 }
 
 install_build_deps() {
-  local packages=()
-  if [[ -f "$REQUIREMENTS" ]]; then
-    mapfile -t packages < <(grep -v -e '^#' -e '^[[:space:]]*$' "$REQUIREMENTS")
-  else
-    # Fallback, so the script still works when copied out of the repo alone.
-    packages=(gnutls-devel libxml2-devel zlib-ng-compat-devel gcc make autoconf
-              automake libtool gettext-devel pkgconf-pkg-config vpnc-script)
-  fi
+  local deps="$REPO_DIR/scripts/install-deps.sh"
+  [[ -x "$deps" ]] || die "cannot find $deps - run this script from its repo checkout"
+  info "Installing build dependencies (needs sudo)"
+  "$deps"
+}
 
-  info "Installing build dependencies (needs sudo): ${packages[*]}"
-  sudo dnf install -y --setopt=install_weak_deps=False "${packages[@]}"
+# Prints the vpnc-script the distro installed; the path differs per distro.
+find_vpnc_script() {
+  local p
+  for p in /etc/vpnc/vpnc-script /usr/share/vpnc-scripts/vpnc-script \
+           /usr/lib/vpnc/vpnc-script /usr/local/etc/vpnc/vpnc-script; do
+    [[ -x "$p" ]] && { printf '%s\n' "$p"; return; }
+  done
+  return 1
 }
 
 build_openconnect() {
@@ -135,6 +138,10 @@ build_openconnect() {
 
   git -C "$SRC_DIR" checkout --quiet "v$VERSION"
 
+  local vpnc_script
+  vpnc_script="$(find_vpnc_script)" \
+    || die "no vpnc-script found - install your distro's vpnc-script/vpnc-scripts package"
+
   info "Building OpenConnect $VERSION (a few minutes)"
   (
     cd "$SRC_DIR"
@@ -142,7 +149,7 @@ build_openconnect() {
     # The rpath makes the binary find its own libopenconnect even under sudo,
     # instead of the system's older one.
     ./configure --prefix="$PREFIX" \
-                --with-vpnc-script=/etc/vpnc/vpnc-script \
+                --with-vpnc-script="$vpnc_script" \
                 LDFLAGS="-Wl,-rpath,$PREFIX/lib"
     make -j"$(nproc)"
     make install          # into $HOME - deliberately no sudo
@@ -176,7 +183,7 @@ resolve_openconnect() {
   fi
 
   if [[ -n "${sys:-}" ]]; then
-    warn "System OpenConnect at $sys is older than $MIN_MAJOR.$MIN_MINOR and will fail against $GATEWAY (docs/01-why-the-fedora-package-fails.md)."
+    warn "System OpenConnect at $sys is older than $MIN_MAJOR.$MIN_MINOR and will fail against $GATEWAY (docs/01-why-the-distro-package-fails.md)."
   fi
   confirm "Build OpenConnect $VERSION into $PREFIX now?" \
     || die "no usable OpenConnect - aborting"

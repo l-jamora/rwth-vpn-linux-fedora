@@ -7,6 +7,11 @@
 # Disconnect with disconnect.sh (or: sudo kill "$(cat /run/openconnect-rwth.pid)").
 set -euo pipefail
 
+# Prefer the self-built 9.21 if present, otherwise the distro's openconnect
+# (fine from 9.20 on - see docs/01-why-the-distro-package-fails.md).
+OC="$HOME/.local/openconnect-9.21/sbin/openconnect"
+[[ -x "$OC" ]] || OC=openconnect
+
 USER_ID="${1:?Usage: $0 YOUR_USERNAME [split|full]}"
 MODE="${2:-split}"
 
@@ -16,7 +21,7 @@ case "$MODE" in
   *) echo "Usage: $0 YOUR_USERNAME [split|full]" >&2; exit 1 ;;
 esac
 
-sudo ~/.local/openconnect-9.21/sbin/openconnect \
+sudo "$OC" \
   --protocol=anyconnect \
   --authgroup="$GROUP" \
   --user="$USER_ID" \

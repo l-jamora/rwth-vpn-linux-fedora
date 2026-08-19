@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Minimal convenience script for connecting to the RWTH VPN via OpenConnect 9.21.
+# Minimal convenience script for connecting to the RWTH VPN via OpenConnect.
 # Usage: rwth-vpn [split|full]
 #
 # Install with:
@@ -7,10 +7,13 @@
 # then edit USER_ID below (in the installed copy) once.
 set -euo pipefail
 
+# Prefer the self-built 9.21 if present, otherwise the distro's openconnect
+# (fine from 9.20 on - see docs/01-why-the-distro-package-fails.md).
 OC="$HOME/.local/openconnect-9.21/sbin/openconnect"
+[[ -x "$OC" ]] || OC=openconnect
 USER_ID="YOUR_USERNAME"
 
-[[ -x "$OC" ]] || { echo "OpenConnect 9.21 missing at $OC - see build-openconnect.sh." >&2; exit 1; }
+command -v "$OC" >/dev/null || { echo "no openconnect found - see build-openconnect.sh." >&2; exit 1; }
 
 case "${1:-split}" in
   split) GROUP="RWTH-VPN (Split Tunnel)" ;;

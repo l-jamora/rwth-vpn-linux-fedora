@@ -1,8 +1,24 @@
-# Fedora packages needed to build OpenConnect 9.21 (see docs/02-building-openconnect.md).
-# Install with:  sudo dnf install -y --setopt=install_weak_deps=False $(grep -v '^#' requirements.txt)
-# rwth-vpn.sh and scripts/install-deps.sh read this file directly.
+# Packages needed to build OpenConnect 9.21 (see docs/02-building-openconnect.md).
+# One section per package manager; scripts/install-deps.sh picks the right one and
+# rwth-vpn.sh calls that script, so this file is the single source of truth.
+#
+# Most distros only need the last entry (vpnc-script / vpnc-scripts) at runtime -
+# the build dependencies matter only if your distro still ships OpenConnect < 9.20.
 
-# Build dependencies
+[pacman]
+gnutls
+libxml2
+zlib
+gcc
+make
+autoconf
+automake
+libtool
+gettext
+pkgconf
+vpnc-scripts
+
+[dnf]
 gnutls-devel
 libxml2-devel
 zlib-ng-compat-devel
@@ -13,6 +29,30 @@ automake
 libtool
 gettext-devel
 pkgconf-pkg-config
-
-# Runtime: provides /etc/vpnc/vpnc-script, which sets up routes and DNS
 vpnc-script
+
+[apt]
+libgnutls28-dev
+libxml2-dev
+zlib1g-dev
+gcc
+make
+autoconf
+automake
+libtool
+gettext
+pkg-config
+vpnc-scripts
+
+[zypper]
+libgnutls-devel
+libxml2-devel
+zlib-devel
+gcc
+make
+autoconf
+automake
+libtool
+gettext-tools
+pkg-config
+vpnc

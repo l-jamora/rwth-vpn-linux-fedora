@@ -1,5 +1,9 @@
 # 4. Connecting
 
+> Where you see `~/.local/openconnect-9.21/sbin/openconnect` below, plain
+> `openconnect` is fine if your system version is ≥ 9.20 — check with
+> `openconnect --version`.
+
 Your username is the RWTH identifier you use for the VPN — for most people the
 `ab123456` style RWTH Single Sign-On ID. Substitute it for `YOUR_USERNAME` below.
 
@@ -16,7 +20,7 @@ sudo ~/.local/openconnect-9.21/sbin/openconnect \
 
 Full tunnel: same command with `--authgroup="RWTH-VPN (Full Tunnel)"`.
 
-No `--useragent` is needed. Version 9.21 sends a default User-Agent the RWTH ASA
+No `--useragent` is needed. Version 9.20+ sends a default User-Agent the RWTH ASA
 accepts. (With 9.12 that was not the case — see [troubleshooting](07-troubleshooting.md).)
 
 Scripted: [`scripts/connect.sh`](../scripts/connect.sh).

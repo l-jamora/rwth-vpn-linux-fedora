@@ -47,17 +47,18 @@ server.
 If the self-built client ever stops working, the official one remains. It is the less
 convenient option:
 
-- No Fedora package. Cisco ships a `.tgz` predeploy bundle; since release **5.1.15**
-  webdeploy additionally produces an `.rpm` installable with `dnf install`. Cisco's GPG
-  key must be imported first.
+- No distro package. Cisco ships a `.tgz` predeploy bundle; since release **5.1.15**
+  webdeploy additionally produces an `.rpm` (Cisco's GPG key must be imported first).
+  Arch users have the `cisco-secure-client` AUR package, which repackages the same
+  bundle.
 - The download is gated behind a Cisco service contract. In practice you obtain it
   through the RWTH software portal or the IT-Center.
 - It installs a permanently running root daemon (`vpnagentd`) and occasionally needs
   reinstalling after kernel or glibc updates.
 
 The project [gertoe/RWTH-VPN](https://github.com/gertoe/RWTH-VPN) automates exactly this
-path — though it considers the openconnect approach dead, which is true for 9.12 but no
-longer true for 9.21.
+path — though it considers the openconnect approach dead, which was true for 9.12 but is
+not true from 9.20 onwards.
 
 ---
 

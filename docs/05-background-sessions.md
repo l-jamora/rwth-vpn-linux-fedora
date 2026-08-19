@@ -1,5 +1,9 @@
 # 5. Running it in the background
 
+> Where you see `~/.local/openconnect-9.21/sbin/openconnect` below, plain
+> `openconnect` is fine if your system version is ≥ 9.20 — check with
+> `openconnect --version`.
+
 `./rwth-vpn.sh -u YOUR_USERNAME --background` does this; `./rwth-vpn.sh --disconnect`
 ends it. The manual equivalent:
 

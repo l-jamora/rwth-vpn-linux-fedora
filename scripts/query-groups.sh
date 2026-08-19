@@ -4,4 +4,9 @@
 # group names ever change on the server side.
 set -euo pipefail
 
-~/.local/openconnect-9.21/sbin/openconnect --authenticate vpn.rwth-aachen.de
+# Prefer the self-built 9.21 if present, otherwise the distro's openconnect
+# (fine from 9.20 on - see docs/01-why-the-distro-package-fails.md).
+OC="$HOME/.local/openconnect-9.21/sbin/openconnect"
+[[ -x "$OC" ]] || OC=openconnect
+
+"$OC" --authenticate vpn.rwth-aachen.de
